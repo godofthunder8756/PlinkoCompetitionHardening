@@ -40,14 +40,14 @@ setup_fail2ban() {
     
     # Create a basic Fail2Ban configuration for SSH
     cat <<EOF | sudo tee /etc/fail2ban/jail.local
-[DEFAULT]
-bantime = 3600
-findtime = 600
-maxretry = 3
-
-[sshd]
-enabled = true
-EOF
+    [DEFAULT]
+    bantime = 3600
+    findtime = 600
+    maxretry = 3
+    
+    [sshd]
+    enabled = true
+    EOF
     
     # Restart Fail2Ban to apply changes
     sudo systemctl restart fail2ban
