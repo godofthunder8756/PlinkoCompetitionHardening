@@ -12,6 +12,7 @@ setup_ufw() {
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw allow ssh
+    # I think we need another rule here to allow access to the mysql port for the scoring user.
     sudo ufw enable
     echo "[+] UFW is installed and configured."
 }
@@ -25,6 +26,8 @@ harden_ssh() {
     
     # Disable root login and enforce key-based authentication
     sudo sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    # Are you certain that the scoring user will still be able to get to mysql when password auth is off?
+    # Also, will you set up your ssh key before you run this script?
     sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
     sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 3/' /etc/ssh/sshd_config
     
@@ -39,7 +42,7 @@ setup_fail2ban() {
     sudo apt install fail2ban -y
     
     # Create a basic Fail2Ban configuration for SSH
-    cat <<EOF | sudo tee /etc/fail2ban/jail.local
+    cat < EOF | sudo tee /etc/fail2ban/jail.local
     [DEFAULT]
     bantime = 3600
     findtime = 600
