@@ -33,6 +33,31 @@ harden_ssh() {
     echo "[+] SSH has been hardened. Root login disabled, password authentication allowed."
 }
 
+# Disable anonymous logins in MySQL
+disable_mysql_anonymous() {
+    echo "[*] Disabling anonymous logins in MySQL..."
+    
+    # Log in to MySQL and remove anonymous users
+    sudo mysql -e "DELETE FROM mysql.user WHERE User='';"
+    sudo mysql -e "FLUSH PRIVILEGES;"
+    
+    echo "[+] Anonymous MySQL logins have been disabled."
+}
+
+# Disable anonymous logins in vsftpd (FTP)
+disable_ftp_anonymous() {
+    if [ -f /etc/vsftpd.conf ]; then
+        echo "[*] Disabling anonymous FTP logins..."
+        
+        # Disable anonymous FTP login in vsftpd config
+        sudo sed -i 's/anonymous_enable=YES/anonymous_enable=NO/' /etc/vsftpd.conf
+        sudo systemctl restart vsftpd
+        echo "[+] Anonymous FTP logins have been disabled."
+    else
+        echo "[!] vsftpd is not installed. Skipping FTP anonymous login disabling."
+    fi
+}
+
 # Configure/Install Fail2Ban
 setup_fail2ban() {
     echo "[*] Installing and configuring Fail2Ban..."
@@ -41,7 +66,7 @@ setup_fail2ban() {
     # Create a basic Fail2Ban configuration for SSH
     cat < EOF | sudo tee /etc/fail2ban/jail.local
 [DEFAULT]
-bantime = 3600
+bantime = 18000
 findtime = 600
 maxretry = 3
 
@@ -121,6 +146,8 @@ main() {
     echo "[*] Starting system hardening..."
     setup_ufw
     harden_ssh
+    disable_mysql_anonymous
+    disable_ftp_anonymous
     setup_fail2ban
     disable_unnecessary_services
     filesystem_hardening
