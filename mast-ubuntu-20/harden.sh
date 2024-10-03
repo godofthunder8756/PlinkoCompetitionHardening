@@ -64,7 +64,7 @@ setup_fail2ban() {
     sudo apt install fail2ban -y
     
     # Create a basic Fail2Ban configuration for SSH
-    cat < EOF | sudo tee /etc/fail2ban/jail.local
+    sudo tee /etc/fail2ban/jail.local > /dev/null <<EOF
 [DEFAULT]
 bantime = 18000
 findtime = 600
@@ -78,7 +78,6 @@ EOF
     sudo systemctl restart fail2ban
     echo "[+] Fail2Ban installed and configured to protect SSH."
 }
-
 # Disable unnecessary services
 disable_unnecessary_services() {
     echo "[*] Disabling unnecessary services..."
