@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to harden the Mast: Ubuntu 20.04 server (with SSH enabled)
+# Script to harden Ubuntu 20.04 server (with SSH enabled)
 
 sudo -v
 
@@ -12,28 +12,25 @@ setup_ufw() {
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw allow ssh
-    # I think we need another rule here to allow access to the mysql port for the scoring user.
+    sudo ufw allow 3306  # Allow MySQL port for scoring access
     sudo ufw enable
     echo "[+] UFW is installed and configured."
 }
 
-# Harden SSH configuration
+# Harden SSH configuration (leaving password authentication enabled)
 harden_ssh() {
     echo "[*] Hardening SSH..."
     
-    # Back up sshd_cofnig.bak
+    # Back up sshd_config.bak
     sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
     
-    # Disable root login and enforce key-based authentication
+    # Disable root login but leave password authentication enabled
     sudo sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-    # Are you certain that the scoring user will still be able to get to mysql when password auth is off?
-    # Also, will you set up your ssh key before you run this script?
-    sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
     sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 3/' /etc/ssh/sshd_config
-    
-    # Restart SSH to apply
+
+    # Restart SSH to apply changes
     sudo systemctl restart sshd
-    echo "[+] SSH has been hardened. Root login disabled, key-based authentication enforced."
+    echo "[+] SSH has been hardened. Root login disabled, password authentication allowed."
 }
 
 # Configure/Install Fail2Ban
@@ -43,21 +40,21 @@ setup_fail2ban() {
     
     # Create a basic Fail2Ban configuration for SSH
     cat < EOF | sudo tee /etc/fail2ban/jail.local
-    [DEFAULT]
-    bantime = 3600
-    findtime = 600
-    maxretry = 3
-    
-    [sshd]
-    enabled = true
-    EOF
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 3
+
+[sshd]
+enabled = true
+EOF
     
     # Restart Fail2Ban to apply changes
     sudo systemctl restart fail2ban
     echo "[+] Fail2Ban installed and configured to protect SSH."
 }
 
-# Disable unnecessary services (ADD MORE)
+# Disable unnecessary services
 disable_unnecessary_services() {
     echo "[*] Disabling unnecessary services..."
     
@@ -98,6 +95,27 @@ setup_auditd() {
     echo "[+] Auditd installed and monitoring critical files."
 }
 
+# Disable IPv6 to reduce attack surface
+disable_ipv6() {
+    echo "[*] Disabling IPv6..."
+    sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+    sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+    echo "net.ipv6.conf.all.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf
+    echo "net.ipv6.conf.lo.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+    echo "[+] IPv6 disabled."
+}
+
+# Set up automatic security updates
+setup_unattended_upgrades() {
+    echo "[*] Installing unattended upgrades..."
+    sudo apt install unattended-upgrades -y
+    sudo dpkg-reconfigure --priority=low unattended-upgrades
+    echo "[+] Unattended upgrades installed and configured."
+}
+
 # Main
 main() {
     echo "[*] Starting system hardening..."
@@ -107,6 +125,8 @@ main() {
     disable_unnecessary_services
     filesystem_hardening
     setup_auditd
+    disable_ipv6
+    setup_unattended_upgrades
     echo "[+] System hardening complete."
 }
 
