@@ -10,7 +10,7 @@ setup_ufw() {
     sudo apt update
     sudo apt install ufw -y
     sudo ufw default deny incoming
-    sudo ufw default allow outgoing
+    sudo ufw default deny outgoing
     sudo ufw allow ssh
     sudo ufw allow 3306  # Allow MySQL port for scoring access
     sudo ufw enable
