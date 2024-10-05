@@ -144,7 +144,6 @@ setup_unattended_upgrades() {
 main() {
     echo "[*] Starting system hardening..."
     
-    #setup_ufw
     harden_ssh
     disable_mysql_anonymous
     disable_ftp_anonymous
@@ -178,7 +177,15 @@ main() {
     # Create a cron job for daily scans at 2:00 AM, logging the output
     echo "0 2 * * * root /usr/bin/clamscan -r / --log=/var/log/clamav/daily_scan.log" | sudo tee -a /etc/crontab > /dev/null
 
+    sudo apt install htop
+
+    setup_ufw
+    
     echo "[+] System hardening complete and EDR setup finished."
+    
+    echo "[+] Starting EDR scan."
+    
+    sudo clamscan -r --remove /var /bin /home /opt /etc
 }
 
 # Run the main function
