@@ -1,3 +1,7 @@
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no
+under group policy management, windows settings, security settings, local policies, user rights
+-change password policy
+-change what users can rdp
 FOR APACHE hardening:
 In httpd.conf
 MODULES:
