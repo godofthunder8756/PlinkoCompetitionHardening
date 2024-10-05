@@ -4,11 +4,12 @@
 
 sudo -v
 
-# Configure/Install UFW Firewall
+# Configure/Install UFW Firewall (and add mysql secure installation)
 setup_ufw() {
     echo "[*] Setting up UFW (Uncomplicated Firewall)..."
     sudo apt update
     sudo apt install ufw -y
+    sudo mysql_secure_installation -y
     sudo ufw default deny incoming
     sudo ufw default deny outgoing
     sudo ufw allow ssh
