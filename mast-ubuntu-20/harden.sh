@@ -9,7 +9,6 @@ setup_ufw() {
     echo "[*] Setting up UFW (Uncomplicated Firewall)..."
     sudo apt update
     sudo apt install ufw -y
-    sudo mysql_secure_installation -y
     sudo ufw default deny incoming
     sudo ufw default deny outgoing
     sudo ufw allow ssh
@@ -144,6 +143,7 @@ setup_unattended_upgrades() {
 # Main
 main() {
     echo "[*] Starting system hardening..."
+    
     setup_ufw
     harden_ssh
     disable_mysql_anonymous
@@ -154,7 +154,31 @@ main() {
     setup_auditd
     disable_ipv6
     setup_unattended_upgrades
-    echo "[+] System hardening complete."
+
+    # Run MySQL secure installation to secure the database
+    sudo mysql_secure_installation -y
+
+    # Install ClamAV and ClamAV daemon for EDR
+    sudo apt install clamav clamav-daemon -y
+
+    # Verify ClamAV installation
+    clamscan --version
+
+    # Update the ClamAV virus definitions
+    sudo systemctl stop clamav-freshclam
+    sudo freshclam
+
+    # Start ClamAV services after update
+    sudo systemctl start clamav-daemon
+    sudo systemctl enable clamav-daemon
+
+    # Schedule regular scans
+    echo "[*] Setting up daily ClamAV scans..."
+    
+    # Create a cron job for daily scans at 2:00 AM, logging the output
+    echo "0 2 * * * root /usr/bin/clamscan -r / --log=/var/log/clamav/daily_scan.log" | sudo tee -a /etc/crontab > /dev/null
+
+    echo "[+] System hardening complete and EDR setup finished."
 }
 
 # Run the main function
