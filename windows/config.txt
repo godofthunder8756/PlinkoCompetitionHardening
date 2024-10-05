@@ -1,0 +1,74 @@
+FOR APACHE hardening:
+In httpd.conf
+MODULES:
+Make sure mod_headers is on
+Make sure mod_rewrite is on
+ADD:
+FileETag None
+ServerTokens Prod
+ServerSignature Off
+TraceEnable off
+Header edit Set-Cookie ^(.)$ $1;HttpOnly;Secure
+Header always append X-Frame-Options SAMEORIGIN
+RewriteEngine On
+RewriteCond %{THE_REQUEST} !HTTP/1.1$ 
+RewriteRule . - [F]
+Timeout 60
+KeepAliveTimeout 1
+LimitRequestFields 30
+Header set X-XSS-Protection "1; mode=block"
+CHANGE IN DIRECTORY:
+root:
+<Directory />
+-AllowOverride None 
+Options None
+Options -Includes -ExecCGI</Directory>
+at htdocs directory 
+-AllowOverride None
+-Options -ExecCGI -FollowSymLinks -Includes
+-Options Indexes Includes
+In any sensitive directory:
+Require all denied
+TURN OFF:
+#LoadModule dav_module modules/mod_dav.so 
+#LoadModule dav_fs_module modules/mod_dav_fs.so
+#Include conf/extra/httpd-dav.conf
+#LoadModule info_module modules/mod_info.so (edited)
+
+PHP security:
+CHANGE:
+expose_php              = Off
+error_reporting         = E_ALL
+display_errors          = Off
+display_startup_errors  = Off
+add:
+allow_url_fopen=Off
+allow_url_include=Off
+variables_order= "GPCS"
+allow_webdav_methods=Off
+session.gc_maxlifetime=600
+file_uploads=Off
+enable_dl=Off
+disable_functions=system, exec, shell_exec, passthru,phpinfo,show_source,highlight_file, popen, proc_open, fopen_with_path, dbmopen, dbase_open,chdir, mkdir, rmdir, chmod,move_uploaded_file, filepro, filepro_rowcount, filepro_retrieve, posix_mkfifo
+
+LocalSettings.php:
+Add:
+$wgGroupPermissions['']['edit'] = false;
+$wgGroupPermissions['']['createaccount'] = false;
+$wgGroupPermissions['']['upload'] = false;
+$wgGroupPermissions['']['move'] = false;
+$wgGroupPermissions['']['movefile'] = false;
+$wgGroupPermissions['']['nuke'] = false;
+$wgGroupPermissions['']['import'] = false;
+$wgGroupPermissions['']['centralauth-createlocal'] = false;
+$wgGroupPermissions['']['editinterface'] = false;
+$wgGroupPermissions['']['editcontentmodel'] = false;
+$wgGroupPermissions['']['editsitejson'] = false;
+$wgGroupPermissions['']['edituserjson'] = false;
+$wgGroupPermissions['']['delete'] = false;
+$wgGroupPermissions['']['protect'] = false;
+$wgGroupPermissions['']['ipblockexempt'] = false;
+$wgGroupPermissions['']['block'] = false;
+$wgGroupPermissions['']['editsitecss'] = false;
+$wgGroupPermissions['']['editsitejs'] = false;
+$wgGroupPermissions['*']['editinterface'] = false;
