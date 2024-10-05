@@ -5,8 +5,8 @@ import logging
 # SSH details
 host = "198.18.3.142"  # Update this as needed
 port = 22
-username = "hkeating"
-default_password = "Lavaswimmer2014!"
+username = "plinktern"
+default_password = "HPCCrulez"
 new_password = "Griffifth1997"
 sudo_password = new_password  # We'll use the new password for sudo as well
 
