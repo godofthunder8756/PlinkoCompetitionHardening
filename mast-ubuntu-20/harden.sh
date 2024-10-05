@@ -140,6 +140,14 @@ setup_unattended_upgrades() {
     echo "[+] Unattended upgrades installed and configured."
 }
 
+create_backups () {
+    # Backup etc, opt, home, var
+    sudo scp -r /home plinktern@172.16.3.5:/home/plinktern/mast
+    sudo scp -r /opt plinktern@172.16.3.5:/home/plinktern/mast
+    sudo scp -r /etc plinktern@172.16.3.5:/home/plinktern/mast
+    sudo scp -r /var plinktern@172.16.3.5:/home/plinktern/mast
+}
+
 # Main
 main() {
     echo "[*] Starting system hardening..."
