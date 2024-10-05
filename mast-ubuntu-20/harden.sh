@@ -187,6 +187,8 @@ main() {
 
     sudo apt install htop
 
+    create_backups
+
     setup_ufw
     
     echo "[+] System hardening complete and EDR setup finished."
