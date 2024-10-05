@@ -6,7 +6,7 @@ import logging
 host = "198.18.0.150"  # Update this as needed
 port = 22
 username = "hkeating"
-default_password = "Lavaswimmer2014!"
+default_password = "ppasswrord"
 new_password = "Griffifth1997"
 sudo_password = new_password  # We'll use the new password for sudo as well
 
