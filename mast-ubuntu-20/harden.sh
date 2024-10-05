@@ -144,7 +144,7 @@ setup_unattended_upgrades() {
 main() {
     echo "[*] Starting system hardening..."
     
-    setup_ufw
+    #setup_ufw
     harden_ssh
     disable_mysql_anonymous
     disable_ftp_anonymous
